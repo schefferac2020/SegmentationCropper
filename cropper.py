@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from PIL import Image
 import imutils
+import os
 
 
 def order_points_old(pts):
@@ -34,15 +35,57 @@ def order_points_old(pts):
 
 
 #frame = np.array(Image.open("/Users/drewscheffer/Downloads/red.jpeg"))
-frame = cv2.imread("/Users/drewscheffer/Desktop/output/seg_COCO_val2014_000000043816.jpg.jpg")
+frame = cv2.imread("./output/seg_COCO_val2014_000000163746.jpg.jpg")
 
 # Convert BGR to HSV
 hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 # define range of blue color in HSV
-lower_blue = np.array([100,50,50])
-upper_blue = np.array([130,255,255])
-# Threshold the HSV image to get only blue colors
+
+'''
+LIGHT BLUE (Right bottom of leg):
+---------------------------------
+lower_blue = np.array([90, 100, 150])
+upper_blue = np.array([110, 255, 255])
 mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+DARK BLUE (Right top of leg)
+---------------------------------
+lower_blue = np.array([110, 150, 150])
+upper_blue = np.array([130, 255, 255])
+mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+RED (Torso)
+----------------------------------
+mask1 = cv2.inRange(hsv, (0,100,120), (5,255,255))
+mask2 = cv2.inRange(hsv, (175,100,120), (180,255,255))
+
+## Merge the mask and crop the red regions
+mask = cv2.bitwise_or(mask1, mask2 )
+
+DARK GREEN (Left top of leg)
+-----------------------------------
+lower_blue = np.array([40, 160, 160])
+upper_blue = np.array([80, 255, 255])
+
+mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+LIGHT GREEN (Left bottom of leg)
+-----------------------------------
+lower_blue = np.array([30, 20, 200])
+upper_blue = np.array([60, 130, 240])
+mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+
+'''
+
+lower_blue = np.array([30, 20, 200])
+upper_blue = np.array([60, 130, 240])
+# Threshold the HSV image to get only blue colors
+
+mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+
+
 bluecnts = cv2.findContours(mask.copy(),
 						cv2.RETR_EXTERNAL,
 						cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -55,6 +98,10 @@ if len(bluecnts)>0:
 
 
 	for (i, c) in enumerate(bluecnts):
+
+		if cv2.contourArea(c) < 25:
+			continue
+
 		box = cv2.minAreaRect(c)
 		box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
 		box = np.array(box, dtype="int")
@@ -71,6 +118,28 @@ if len(bluecnts)>0:
 		# loop over the original points and draw them
 		for ((x, y), color) in zip(rect, colors):
 			cv2.circle(frame, (int(x), int(y)), 5, color, -1)
+
+		cv2.putText(frame, "Object #{}".format(i + 1),
+			(int(rect[0][0] - 15), int(rect[0][1] - 15)),
+			cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 2)
+
+
+		#This is where we use this information to crop out the body
+		#parts from the real image before the segmentation process.
+
+		#find the right file name
+		filename = "";
+		for fname in os.listdir("./input/"):
+			if "COCO_val2014_000000163746" in fname:
+				filename = fname;
+		orig_image = cv2.imread("./input/" + filename)
+
+
+		## TODO - ACTUALLY CROP THE IMAGE HERE
+		cropped_image = orig_image
+		#Write the cropped image to a file
+
+		cv2.imwrite('./final/' + filename, cropped_image)
 
 
 
