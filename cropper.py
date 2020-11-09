@@ -115,8 +115,46 @@ upper_blue = np.array([95, 255, 255])
 
 
 ''' 
-lower_blue = np.array([80, 100, 25])
-upper_blue = np.array([95, 255, 255])
+
+filters = [("right-bot-leg", np.array([90, 100, 150]), np.array([110, 255, 255])), \
+		   ("right-top-leg", np.array([110, 150, 150]), np.array([130, 255, 255])), \
+		   ("left-leg-top", np.array([40, 160, 160]), np.array([80, 255, 255])), \
+		   ("left-leg-bot", np.array([30, 20, 200]), np.array([60, 130, 240])), \
+		   ("right-forearm", np.array([145, 60, 20]), np.array([165, 250, 240])), \
+		   ("right-upper-arm", np.array([5, 100, 75]), np.array([15, 255, 255])), \
+		   ("right-hand-left-arm", np.array([20, 150, 25]), np.array([30, 255, 255])), \
+		   ("left-forearm", np.array([140, 150, 25]), np.array([160, 255, 255])), \
+		   ("left-hand", np.array([80, 100, 25]), np.array([95, 255, 255])), \
+		   ("torso", np.array((0,100,120)), np.array((5,255,255)), np.array((175,100,120)), np.array((180,255,255)))]
+
+
+#---------------------------------------------------Create Directories---------------------------------------------------#
+path = os.getcwd()
+print ("The current working directory is %s" % path)
+
+path = "./final"
+try:
+    os.mkdir(path)
+except OSError:
+    print ("Creation of the directory %s failed" % path)
+else:
+    print ("Successfully created the directory %s " % path)
+
+
+for i in range(0, len(filters), 1):
+	folder_name = filters[i][0]
+	folder_path = path + "/" + folder_name
+	try:
+	    os.mkdir(folder_path)
+	except OSError:
+	    print ("Creation of the directory %s failed" % folder_path)
+	else:
+	    print ("Successfully created the directory %s " % folder_path)
+
+
+
+lower_blue = filters[5][1]
+upper_blue = filters[5][2]
 # Threshold the HSV image to get only blue colors
 
 mask = cv2.inRange(hsv, lower_blue, upper_blue)
