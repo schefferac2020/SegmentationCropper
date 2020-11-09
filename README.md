@@ -1,6 +1,6 @@
 # SegmentationCropper
 
-This project is an attempt to segment body parts from the output of the CDCL-human-part-segmentation dataset found on github! It's well.... 
+This project is an attempt to segment body parts from the output of the CDCL-human-part-segmentation dataset found on github! It's ummm.... 
 a work in progress but I am determined!!
 
 ## Current Required Dependencies:
